@@ -3,9 +3,9 @@ pipeline {
         label 'slave1'
     }
     
-    parameters {
-        string(name: 'NAME', defaultValue: '', description: 'Your name')
-        string(name: 'AGE', defaultValue: '', description: 'Your age')
+    environment {
+        SCRIPT_NAME = ''
+        SCRIPT_AGE = ''
     }
     
     stages {
@@ -18,29 +18,23 @@ pipeline {
         stage('Read Parameters') {
             steps {
                 script {
-                    // Print the contents of parameters.json
-                    sh 'cat parameters.json'
-                    
                     def jsonString = sh(script: 'cat parameters.json', returnStdout: true).trim()
-                    println "JSON String: ${jsonString}"
-                    
                     def props = new groovy.json.JsonSlurper().parseText(jsonString)
-                    println "Parsed properties: ${props}"
                     
-                    env.name = props.name
-                    env.age = props.age
-                    
-                    // Print the environment variables
-                    sh 'echo "Name: $name"'
-                    sh 'echo "Age: $age"'
+                    // Set environment variables using withEnv
+                    withEnv(["SCRIPT_NAME=${props.name}", "SCRIPT_AGE=${props.age}"]) {
+                        sh """
+                            echo "Name from env: \$SCRIPT_NAME"
+                            echo "Age from env: \$SCRIPT_AGE"
+                            
+                            # Update the script to use these environment variables
+                            echo '#!/bin/bash' > script.sh
+                            echo 'echo "Hello, I am \$SCRIPT_NAME and I am \$SCRIPT_AGE years old"' >> script.sh
+                            chmod +x script.sh
+                            ./script.sh
+                        """
+                    }
                 }
-            }
-        }
-        
-        stage('Execute Script') {
-            steps {
-                sh 'chmod +x script.sh'
-                sh './script.sh'
             }
         }
     }
