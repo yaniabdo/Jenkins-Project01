@@ -3,41 +3,25 @@ pipeline {
         label 'slave1'
     }
     
-    environment {
-        SCRIPT_NAME = ''
-        SCRIPT_AGE = ''
-    }
-    
     stages {
-        stage('Process JSON and Execute Script') {
+        stage('Execute Script') {
             steps {
                 script {
-                    // Read JSON content
-                    def jsonString = sh(script: 'cat parameters.json', returnStdout: true).trim()
+                    // Read and parse JSON directly into environment variables
+                    def json = sh(script: 'cat parameters.json', returnStdout: true).trim()
+                    def props = readJSON text: json
                     
-                    // Convert the LazyMap to a regular map to avoid serialization issues
-                    def props = new groovy.json.JsonSlurperClassic().parseText(jsonString)
-                    def name = props.name.toString()
-                    def age = props.age.toString()
+                    // Set environment variables
+                    env.SCRIPT_NAME = props.name
+                    env.SCRIPT_AGE = props.age
                     
-                    // Execute with parameters
-                    withEnv(["SCRIPT_NAME=${name}", "SCRIPT_AGE=${age}"]) {
-                        sh """
-                            chmod +x script.sh
-                            ./script.sh
-                        """
-                    }
+                    // Execute script
+                    sh '''
+                        chmod +x script.sh
+                        ./script.sh
+                    '''
                 }
             }
-        }
-    }
-    
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
