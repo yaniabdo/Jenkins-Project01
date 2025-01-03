@@ -4,6 +4,12 @@ pipeline {
     }
     
     stages {
+        stage('Introduction') {
+            steps {
+                echo 'Script is created by yani'
+            }
+        }
+        
         stage('Execute Script') {
             steps {
                 script {
@@ -22,6 +28,15 @@ pipeline {
                     '''
                 }
             }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
