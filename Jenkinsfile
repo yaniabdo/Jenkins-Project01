@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'slave'    // This will make the pipeline run on your slave node
+    }
     
     parameters {
         string(name: 'NAME', defaultValue: '', description: 'Your name')
