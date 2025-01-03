@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'slave'    // This will make the pipeline run on your slave node
+        label 'slave1'    // This will make the pipeline run on your slave node
     }
     
     parameters {
