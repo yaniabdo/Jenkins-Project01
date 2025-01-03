@@ -1,7 +1,6 @@
 pipeline {
     agent {
-        label 'slave1'    // Make sure this matches your slave node label
-
+        label 'slave'
     }
     
     parameters {
@@ -19,9 +18,8 @@ pipeline {
         stage('Read Parameters') {
             steps {
                 script {
-                    // Read JSON file and parse it properly
-                    def jsonContent = readFile(file: 'parameters.json')
-                    def props = readJSON(text: jsonContent)
+                    def jsonString = sh(script: 'cat parameters.json', returnStdout: true).trim()
+                    def props = new groovy.json.JsonSlurper().parseText(jsonString)
                     env.name = props.name
                     env.age = props.age
                 }
