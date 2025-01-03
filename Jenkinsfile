@@ -1,6 +1,7 @@
 pipeline {
     agent {
-        label 'slave1'    // This will make the pipeline run on your slave node
+        label 'slave1'    // Make sure this matches your slave node label
+
     }
     
     parameters {
@@ -18,7 +19,9 @@ pipeline {
         stage('Read Parameters') {
             steps {
                 script {
-                    def props = readJSON file: 'parameters.json'
+                    // Read JSON file and parse it properly
+                    def jsonContent = readFile(file: 'parameters.json')
+                    def props = readJSON(text: jsonContent)
                     env.name = props.name
                     env.age = props.age
                 }
